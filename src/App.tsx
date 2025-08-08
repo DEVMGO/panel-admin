@@ -1,5 +1,12 @@
 import { Button, ConfigProvider, Form, Input } from "antd"
+import type { Rule } from "antd/es/form";
 import { useState } from "react";
+
+interface FormValues {
+  username: string;
+  password: string;
+  confirmPassword: string;
+}
 
 function App() {
   const [form] = Form.useForm();
@@ -11,13 +18,11 @@ function App() {
     hasSymbol: false,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onFinish = (values: any) => {
+  const onFinish = (values: FormValues) => {
     console.log('فرم با موفقیت ارسال شد:', values);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const validateUsername = (_: any, value: string) => {
+  const validateUsername = (_: Rule, value: string): Promise<void> => {
     if (!value) {
       return Promise.reject(new Error('لطفاً نام کاربری را وارد کنید!'));
     }
@@ -33,8 +38,9 @@ function App() {
     return Promise.resolve();
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const validatePassword = (_: any, value: string) => {
+
+
+  const validatePassword = (_: Rule, value: string): Promise<void> => {
     if (!value) {
       return Promise.reject(new Error('لطفاً رمز عبور را وارد کنید!'));
     }
@@ -42,8 +48,7 @@ function App() {
     const hasLowercase = /[a-z]/.test(value);
     const hasUppercase = /[A-Z]/.test(value);
     const hasNumber = /[0-9]/.test(value);
-    // eslint-disable-next-line no-useless-escape
-    const hasSymbol = /[@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
+    const hasSymbol: boolean = /[@#$%^&*()_+={}[\]|;:'",.<>?/]/.test(value);
 
     setPasswordRules({
       minLength,
@@ -71,16 +76,15 @@ function App() {
     return Promise.resolve();
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handlePasswordChange = (e: { target: { value: any; }; }) => {
-    const value = e.target.value;
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value: string = e.target.value;
     setPasswordRules({
       minLength: value.length >= 8,
       hasLowercase: /[a-z]/.test(value),
       hasUppercase: /[A-Z]/.test(value),
       hasNumber: /[0-9]/.test(value),
-      // eslint-disable-next-line no-useless-escape
-      hasSymbol: /[@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value),
+      hasSymbol: /[@#$%^&*()_+={}[\]|;:'",.<>?/]/.test(value),
     });
   };
 
