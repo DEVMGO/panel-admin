@@ -3,6 +3,13 @@
   color: white;
 }
 
+a {
+  text-decoration: dashed;
+  color: blue;
+  background: black;
+  font-size: medium;
+}
+
 body {
   background: black;
   color: white;
