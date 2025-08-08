@@ -1,0 +1,513 @@
+import { Button, ConfigProvider, Form, Input } from "antd"
+import { useState } from "react";
+
+function App() {
+  const [form] = Form.useForm();
+  const [passwordRules, setPasswordRules] = useState({
+    minLength: false,
+    hasLowercase: false,
+    hasUppercase: false,
+    hasNumber: false,
+    hasSymbol: false,
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onFinish = (values: any) => {
+    console.log('فرم با موفقیت ارسال شد:', values);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const validateUsername = (_: any, value: string) => {
+    if (!value) {
+      return Promise.reject(new Error('لطفاً نام کاربری را وارد کنید!'));
+    }
+    if (value.trim().length === 0) {
+      return Promise.reject(new Error('نام کاربری نمی‌تواند فقط فاصله باشد!'));
+    }
+    if (value.startsWith(' ')) {
+      return Promise.reject(new Error('نام کاربری نمی‌تواند با فاصله شروع شود!'));
+    }
+    if (!/^[\u0600-\u06FF\s]+$/.test(value)) {
+      return Promise.reject(new Error('نام کاربری باید فقط شامل حروف فارسی باشد!'));
+    }
+    return Promise.resolve();
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const validatePassword = (_: any, value: string) => {
+    if (!value) {
+      return Promise.reject(new Error('لطفاً رمز عبور را وارد کنید!'));
+    }
+    const minLength = value.length >= 8;
+    const hasLowercase = /[a-z]/.test(value);
+    const hasUppercase = /[A-Z]/.test(value);
+    const hasNumber = /[0-9]/.test(value);
+    // eslint-disable-next-line no-useless-escape
+    const hasSymbol = /[@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
+
+    setPasswordRules({
+      minLength,
+      hasLowercase,
+      hasUppercase,
+      hasNumber,
+      hasSymbol,
+    });
+
+    if (!minLength) {
+      return Promise.reject(new Error('رمز عبور باید حداقل 8 کاراکتر باشد!'));
+    }
+    if (!hasLowercase) {
+      return Promise.reject(new Error('رمز عبور باید شامل حروف کوچک انگلیسی باشد!'));
+    }
+    if (!hasUppercase) {
+      return Promise.reject(new Error('رمز عبور باید شامل حروف بزرگ انگلیسی باشد!'));
+    }
+    if (!hasNumber) {
+      return Promise.reject(new Error('رمز عبور باید شامل عدد باشد!'));
+    }
+    if (!hasSymbol) {
+      return Promise.reject(new Error('رمز عبور باید شامل نمادهایی مثل @ یا / باشد!'));
+    }
+    return Promise.resolve();
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handlePasswordChange = (e: { target: { value: any; }; }) => {
+    const value = e.target.value;
+    setPasswordRules({
+      minLength: value.length >= 8,
+      hasLowercase: /[a-z]/.test(value),
+      hasUppercase: /[A-Z]/.test(value),
+      hasNumber: /[0-9]/.test(value),
+      // eslint-disable-next-line no-useless-escape
+      hasSymbol: /[@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value),
+    });
+  };
+
+  return (
+    <ConfigProvider
+      theme={{
+        token: {
+          fontFamily: 'Vazir, sans-serif',
+        },
+      }}
+    >
+      <div className="page-style">
+        <h1 className="text-2xl font-bold mb-6 text-center">فرم ثبت‌نام</h1>
+        <Form
+          form={form}
+          name="register"
+          onFinish={onFinish}
+          layout="vertical"
+          scrollToFirstError
+          style={{
+            width: '320px'
+          }}
+        >
+          <Form.Item
+            name="username"
+            label="نام کاربری"
+            rules={[{ validator: validateUsername }]}
+            hasFeedback
+          >
+            <Input placeholder="نام کاربری (فقط حروف فارسی)" />
+          </Form.Item>
+
+          <Form.Item
+            name="password"
+            label="رمز عبور"
+            rules={[{ validator: validatePassword }]}
+            hasFeedback
+          >
+            <Input.Password
+              placeholder="رمز عبور"
+              onChange={handlePasswordChange}
+            />
+          </Form.Item>
+
+          <div style={{ width: '100%' }}>
+            <div className="password-rule">
+              <svg viewBox="0 0 24 24" fill={passwordRules.minLength ? '#52c41a' : '#d9d9d9'}>
+                <path d={passwordRules.minLength ? "M20.485 3.515l-8.485 8.485-3.536-3.536-2.829 2.829 6.364 6.364 11.314-11.314z" : "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"} />
+              </svg>
+              <span className={passwordRules.minLength ? 'text-green-500' : 'text-gray-500'}>
+                حداقل 8 کاراکتر
+              </span>
+            </div>
+            <div className="password-rule">
+              <svg viewBox="0 0 24 24" fill={passwordRules.hasLowercase ? '#52c41a' : '#d9d9d9'}>
+                <path d={passwordRules.hasLowercase ? "M20.485 3.515l-8.485 8.485-3.536-3.536-2.829 2.829 6.364 6.364 11.314-11.314z" : "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"} />
+              </svg>
+              <span className={passwordRules.hasLowercase ? 'text-green-500' : 'text-gray-500'}>
+                حروف کوچک انگلیسی
+              </span>
+            </div>
+            <div className="password-rule">
+              <svg viewBox="0 0 24 24" fill={passwordRules.hasUppercase ? '#52c41a' : '#d9d9d9'}>
+                <path d={passwordRules.hasUppercase ? "M20.485 3.515l-8.485 8.485-3.536-3.536-2.829 2.829 6.364 6.364 11.314-11.314z" : "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"} />
+              </svg>
+              <span className={passwordRules.hasUppercase ? 'text-green-500' : 'text-gray-500'}>
+                حروف بزرگ انگلیسی
+              </span>
+            </div>
+            <div className="password-rule">
+              <svg viewBox="0 0 24 24" fill={passwordRules.hasNumber ? '#52c41a' : '#d9d9d9'}>
+                <path d={passwordRules.hasNumber ? "M20.485 3.515l-8.485 8.485-3.536-3.536-2.829 2.829 6.364 6.364 11.314-11.314z" : "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"} />
+              </svg>
+              <span className={passwordRules.hasNumber ? 'text-green-500' : 'text-gray-500'}>
+                حداقل یک عدد
+              </span>
+            </div>
+            <div className="password-rule">
+              <svg viewBox="0 0 24 24" fill={passwordRules.hasSymbol ? '#52c41a' : '#d9d9d9'}>
+                <path d={passwordRules.hasSymbol ? "M20.485 3.515l-8.485 8.485-3.536-3.536-2.829 2.829 6.364 6.364 11.314-11.314z" : "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"} />
+              </svg>
+              <span className={passwordRules.hasSymbol ? 'text-green-500' : 'text-gray-500'}>
+                حداقل یک نماد (@، / و غیره)
+              </span>
+            </div>
+          </div>
+
+          <Form.Item
+            name="confirmPassword"
+            label="تأیید رمز عبور"
+            dependencies={['password']}
+            hasFeedback
+            rules={[
+              { required: true, message: 'لطفاً رمز عبور را تأیید کنید!' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('رمزهای عبور مطابقت ندارند!'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password placeholder="تأیید رمز عبور" />
+          </Form.Item>
+
+          <Form.Item style={{ display: 'flex', justifyContent: 'center' }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="submit-button"
+            >
+              ثبت‌نام
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+    </ConfigProvider>
+  )
+}
+
+export default App
+
+
+
+// import React, { useState } from 'react';
+// import type { CascaderProps } from 'antd';
+// import {
+//   AutoComplete,
+//   Button,
+//   Cascader,
+//   Checkbox,
+//   Col,
+//   ConfigProvider,
+//   Form,
+//   Input,
+//   InputNumber,
+//   Row,
+//   Select,
+//   theme,
+// } from 'antd';
+
+// const { Option } = Select;
+
+// interface DataNodeType {
+//   value: string;
+//   label: string;
+//   children?: DataNodeType[];
+// }
+
+// const residences: CascaderProps<DataNodeType>['options'] = [
+//   {
+//     value: 'zhejiang',
+//     label: 'Zhejiang',
+//     children: [
+//       {
+//         value: 'hangzhou',
+//         label: 'Hangzhou',
+//         children: [
+//           {
+//             value: 'xihu',
+//             label: 'West Lake',
+//           },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     value: 'jiangsu',
+//     label: 'Jiangsu',
+//     children: [
+//       {
+//         value: 'nanjing',
+//         label: 'Nanjing',
+//         children: [
+//           {
+//             value: 'zhonghuamen',
+//             label: 'Zhong Hua Men',
+//           },
+//         ],
+//       },
+//     ],
+//   },
+// ];
+
+// const formItemLayout = {
+//   labelCol: {
+//     xs: { span: 24 },
+//     sm: { span: 8 },
+//   },
+//   wrapperCol: {
+//     xs: { span: 24 },
+//     sm: { span: 16 },
+//   },
+// };
+
+// const tailFormItemLayout = {
+//   wrapperCol: {
+//     xs: {
+//       span: 24,
+//       offset: 0,
+//     },
+//     sm: {
+//       span: 16,
+//       offset: 8,
+//     },
+//   },
+// };
+
+// const App: React.FC = () => {
+//   const [form] = Form.useForm();
+
+//   const onFinish = (values: any) => {
+//     console.log('Received values of form: ', values);
+//   };
+
+//   const prefixSelector = (
+//     <Form.Item name="prefix" noStyle>
+//       <Select style={{ width: 70 }}>
+//         <Option value="86">+86</Option>
+//         <Option value="87">+87</Option>
+//       </Select>
+//     </Form.Item>
+//   );
+
+//   const suffixSelector = (
+//     <Form.Item name="suffix" noStyle>
+//       <Select style={{ width: 70 }}>
+//         <Option value="USD">$</Option>
+//         <Option value="CNY">¥</Option>
+//       </Select>
+//     </Form.Item>
+//   );
+
+//   const [autoCompleteResult, setAutoCompleteResult] = useState<string[]>([]);
+
+//   const onWebsiteChange = (value: string) => {
+//     if (!value) {
+//       setAutoCompleteResult([]);
+//     } else {
+//       setAutoCompleteResult(['.com', '.org', '.net'].map((domain) => `${value}${domain}`));
+//     }
+//   };
+
+//   const websiteOptions = autoCompleteResult.map((website) => ({
+//     label: website,
+//     value: website,
+//   }));
+
+//   return (
+//     <ConfigProvider
+//       theme={{
+//         // 2. Combine dark algorithm and compact algorithm
+//         // algorithm: [theme.darkAlgorithm, theme.compactAlgorithm],
+//       }}
+//     >
+//       <Form
+//         {...formItemLayout}
+//         form={form}
+//         name="register"
+//         onFinish={onFinish}
+//         initialValues={{ residence: ['zhejiang', 'hangzhou', 'xihu'], prefix: '86' }}
+//         style={{ maxWidth: 600 }}
+//         scrollToFirstError
+//       >
+//         <Form.Item
+//           name="email"
+//           label="E-mail"
+//           rules={[
+//             {
+//               type: 'email',
+//               message: 'The input is not valid E-mail!',
+//             },
+//             {
+//               required: true,
+//               message: 'Please input your E-mail!',
+//             },
+//           ]}
+//         >
+//           <Input />
+//         </Form.Item>
+
+//         <Form.Item
+//           name="password"
+//           label="Password"
+//           rules={[
+//             {
+//               required: true,
+//               message: 'Please input your password!',
+//             },
+//           ]}
+//           hasFeedback
+//         >
+//           <Input.Password />
+//         </Form.Item>
+
+//         <Form.Item
+//           name="confirm"
+//           label="Confirm Password"
+//           dependencies={['password']}
+//           hasFeedback
+//           rules={[
+//             {
+//               required: true,
+//               message: 'Please confirm your password!',
+//             },
+//             ({ getFieldValue }) => ({
+//               validator(_, value) {
+//                 if (!value || getFieldValue('password') === value) {
+//                   return Promise.resolve();
+//                 }
+//                 return Promise.reject(new Error('The new password that you entered do not match!'));
+//               },
+//             }),
+//           ]}
+//         >
+//           <Input.Password />
+//         </Form.Item>
+
+//         <Form.Item
+//           name="nickname"
+//           label="Nickname"
+//           tooltip="What do you want others to call you?"
+//           rules={[{ required: true, message: 'Please input your nickname!', whitespace: true }]}
+//         >
+//           <Input />
+//         </Form.Item>
+
+//         <Form.Item
+//           name="residence"
+//           label="Habitual Residence"
+//           rules={[
+//             { type: 'array', required: true, message: 'Please select your habitual residence!' },
+//           ]}
+//         >
+//           <Cascader options={residences} />
+//         </Form.Item>
+
+//         <Form.Item
+//           name="phone"
+//           label="Phone Number"
+//           rules={[{ required: true, message: 'Please input your phone number!' }]}
+//         >
+//           <Input addonBefore={prefixSelector} style={{ width: '100%' }} />
+//         </Form.Item>
+
+//         <Form.Item
+//           name="donation"
+//           label="Donation"
+//           rules={[{ required: true, message: 'Please input donation amount!' }]}
+//         >
+//           <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
+//         </Form.Item>
+
+//         <Form.Item
+//           name="website"
+//           label="Website"
+//           rules={[{ required: true, message: 'Please input website!' }]}
+//         >
+//           <AutoComplete options={websiteOptions} onChange={onWebsiteChange} placeholder="website">
+//             <Input />
+//           </AutoComplete>
+//         </Form.Item>
+
+//         <Form.Item
+//           name="intro"
+//           label="Intro"
+//           rules={[{ required: true, message: 'Please input Intro' }]}
+//         >
+//           <Input.TextArea showCount maxLength={100} />
+//         </Form.Item>
+
+//         <Form.Item
+//           name="gender"
+//           label="Gender"
+//           rules={[{ required: true, message: 'Please select gender!' }]}
+//         >
+//           <Select placeholder="select your gender">
+//             <Option value="male">Male</Option>
+//             <Option value="female">Female</Option>
+//             <Option value="other">Other</Option>
+//           </Select>
+//         </Form.Item>
+
+//         <Form.Item label="Captcha" extra="We must make sure that your are a human.">
+//           <Row gutter={8}>
+//             <Col span={12}>
+//               <Form.Item
+//                 name="captcha"
+//                 noStyle
+//                 rules={[{ required: true, message: 'Please input the captcha you got!' }]}
+//               >
+//                 <Input />
+//               </Form.Item>
+//             </Col>
+//             <Col span={12}>
+//               <Button>Get captcha</Button>
+//             </Col>
+//           </Row>
+//         </Form.Item>
+
+//         <Form.Item
+//           name="agreement"
+//           valuePropName="checked"
+//           rules={[
+//             {
+//               validator: (_, value) =>
+//                 value ? Promise.resolve() : Promise.reject(new Error('Should accept agreement')),
+//             },
+//           ]}
+//           {...tailFormItemLayout}
+//         >
+//           <Checkbox>
+//             I have read the <a href="">agreement</a>
+//           </Checkbox>
+//         </Form.Item>
+//         <Form.Item {...tailFormItemLayout}>
+//           <Button type="primary" htmlType="submit">
+//             Register
+//           </Button>
+//         </Form.Item>
+//       </Form>
+//     </ConfigProvider>
+//   );
+// };
+
+// export default App;
+
+
