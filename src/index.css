@@ -11,6 +11,10 @@ a {
   height: 100px;
 }
 
+li {
+  color: aqua;
+}
+
 body {
   background: black;
   color: white;
